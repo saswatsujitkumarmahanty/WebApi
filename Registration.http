@@ -1,0 +1,63 @@
+@Registration_HostAddress = https://localhost:7158
+
+GET {{Registration_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{Registration_HostAddress}}/api/employee
+
+###
+
+GET {{Registration_HostAddress}}/api/employee
+
+###
+
+POST {{Registration_HostAddress}}/api/employee
+Content-Type: application/json
+
+{
+  "id": "3a8cc7a9-7f6b-4087-a13b-c9a05e043825",
+    "name": "Saswat",
+    "gender": "male",
+    "email": "saswat@gmail.com",
+    "phone": "1234567890",
+    "age": 19,
+    "salary": 123456.00
+}
+
+###
+
+POST {{Registration_HostAddress}}/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Phase Three Test",
+  "gender": "Male",
+  "email": "test@gmail.com",
+  "phone": "1234567890",
+  "age": 25,
+  "salary": 50000
+}
+
+###
+
+POST {{Registration_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "saswatsujitkumarmahanty@gmail.com",
+  "phone": "8208764550"
+}
+
+###
+
+POST {{Registration_HostAddress}}/api/auth/verify-otp
+Content-Type: application/json
+
+{
+ "email": "saswatsujitkumarmahanty@gmail.com",
+ "otpCode": "116453"
+}
+
+###
