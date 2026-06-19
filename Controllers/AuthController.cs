@@ -49,26 +49,10 @@ namespace Registration.Data
             if (loginDto == null)
                 return BadRequest(new { message = "Please provide login details." });
 
-            // --- NEW: Phone Number Normalization ---
-            string cleanPhone = loginDto.Phone;
-
-            if (!string.IsNullOrEmpty(cleanPhone))
-            {
-                // Remove any '+' symbols
-                cleanPhone = cleanPhone.Replace("+", "").Trim();
-
-                // If it includes the country code (91) and is exactly 12 digits long, keep only the last 10 digits
-                if (cleanPhone.StartsWith("91") && cleanPhone.Length == 12)
-                {
-                    cleanPhone = cleanPhone.Substring(2);
-                }
-            }
-            // ---------------------------------------
-
-            // 1. Verify user credentials exist in SQL Server first using the CLEANED phone number
+            // 1. Verify user credentials exist in SQL Server first (Original exact match)
             var user = dbContext.Users.FirstOrDefault(u =>
                 u.Email == loginDto.Email &&
-                u.Phone == cleanPhone);
+                u.Phone == loginDto.Phone);
 
             if (user == null)
             {
@@ -86,9 +70,7 @@ namespace Registration.Data
 
             // 4. Fire dispatch methods simultaneously in parallel background threads
             var emailTask = SendMockEmailAsync(user.Email, otpCode);
-
-            // NEW: Re-attach the '91' country code so MSG91 can route the text message correctly
-            var smsTask = SendMockSmsAsync("91" + cleanPhone, otpCode);
+            var smsTask = SendMockSmsAsync(user.Phone, otpCode);
 
             await Task.WhenAll(emailTask, smsTask);
 
@@ -137,40 +119,30 @@ namespace Registration.Data
             return Unauthorized(new { message = "The code entered is incorrect or has expired. Please try again." });
         }
 
-        /* ====================================================================
-           INFRASTRUCTURE GATEWAYS PLACEHOLDERS
-           Replace the internal Console printing with your actual gateway SDKs
-           (e.g., Twilio for SMS, MailKit / SendGrid for Email messages)
-           ==================================================================== */
-
         private async Task SendMockEmailAsync(string targetEmail, string code)
         {
-
+            // 3. Read the values dynamically from appsettings.json
             var smtpServer = _configuration["SmtpSettings:Server"];
             var smtpPort = int.Parse(_configuration["SmtpSettings:Port"] ?? "587");
             var senderName = _configuration["SmtpSettings:SenderName"];
             var senderEmail = _configuration["SmtpSettings:SenderEmail"];
             var appPassword = _configuration["SmtpSettings:AppPassword"];
 
-            // 1. Construct the email message
             var message = new MimeMessage();
-
-            // TODO: Replace with your actual sender name and email
-            message.From.Add(new MailboxAddress("Registration App", "YOUR_EMAIL@gmail.com"));
+            message.From.Add(new MailboxAddress(senderName, senderEmail));
             message.To.Add(new MailboxAddress("", targetEmail));
             message.Subject = "Your Login Verification Code";
 
-            // 2. Set the email body
             message.Body = new TextPart("plain")
             {
                 Text = $"Hello!\n\nYour secure login validation token code is: {code}\n\nThis code will expire in 5 minutes."
             };
 
-            // 3. Connect to the SMTP server and send
             using (var client = new SmtpClient())
             {
                 try
                 {
+                    // 4. Use the dynamic variables instead of hardcoded strings
                     await client.ConnectAsync(smtpServer, smtpPort, SecureSocketOptions.StartTls);
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
                     await client.AuthenticateAsync(senderEmail, appPassword);
@@ -178,53 +150,20 @@ namespace Registration.Data
                 }
                 catch (Exception ex)
                 {
-                    // Log the error in your console so you can troubleshoot if it fails
                     Console.WriteLine($"\n[SMTP ERROR] Failed to send email to {targetEmail}: {ex.Message}\n");
                 }
                 finally
                 {
-                    // Always disconnect cleanly
                     await client.DisconnectAsync(true);
                 }
             }
         }
+
         private async Task SendMockSmsAsync(string targetPhone, string code)
         {
-            var authKey = _configuration["Msg91Settings:AuthKey"];
-
-            // --- STEP 3: Read the Template ID from appsettings.json ---
-            var templateId = _configuration["Msg91Settings:TemplateId"];
-
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    // Clean up mobile numbers to remove any leading '+' symbols if present
-                    targetPhone = targetPhone.Replace("+", "").Trim();
-
-                    // --- STEP 3: Inject template_id into the query string ---
-                    string otpApiUrl = $"https://control.msg91.com/api/v5/otp?template_id={templateId}&mobile={targetPhone}&otp={code}&authkey={authKey}";
-
-                    var response = await client.PostAsync(otpApiUrl, null);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string contents = await response.Content.ReadAsStringAsync();
-
-                        // This will now print the success JSON instead of failing silently!
-                        Console.WriteLine($"\n[MSG91 RESPONSE] {contents}\n");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"\n[OTP ROUTE ERROR] Gateway response status: {response.StatusCode}\n");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"\n[CRITICAL FAULT] Failed contacting OTP network infrastructure: {ex.Message}\n");
-                }
-            }
+            await Task.Delay(50); // Simulate asynchronous network I/O latency
+            Console.WriteLine($"\n[GATEWAY OUTBOUND SMS] To: {targetPhone} | Msg: Use code {code} to complete login authorization.\n");
         }
-    
     }
+
 }

@@ -9,10 +9,6 @@ GET {{Registration_HostAddress}}/api/employee
 
 ###
 
-GET {{Registration_HostAddress}}/api/employee
-
-###
-
 POST {{Registration_HostAddress}}/api/employee
 Content-Type: application/json
 
@@ -57,7 +53,7 @@ Content-Type: application/json
 
 {
  "email": "saswatsujitkumarmahanty@gmail.com",
- "otpCode": "116453"
+ "otpCode": "823399"
 }
 
 ###
