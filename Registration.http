@@ -57,3 +57,12 @@ Content-Type: application/json
 }
 
 ###
+
+PUT {{Registration_HostAddress}}/api/auth/update-name/87D41482-EFD6-4784-B711-07B08A11C108
+Content-Type: application/json
+
+{
+ "name": "Saswat Sujitkumar Mahanty"
+}
+
+###

@@ -83,6 +83,27 @@ namespace Registration.Data
             });
         }
 
+        // PUT: api/Auth/update-name/{id}
+        [HttpPut("update-name/{id}")]
+        public IActionResult UpdateName(Guid id, [FromBody] UpdateNameDto dto)
+        {
+            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found." });
+            }
+
+            user.Name = dto.Name;
+            dbContext.SaveChanges();
+
+            return Ok(new { message = "Name updated successfully!", newName = user.Name });
+        }
+
+        public class UpdateNameDto
+        {
+            public string Name { get; set; } = string.Empty;
+        }
+
         // POST: api/Auth/verify-otp (STEP 2: Validate OTP Code & Complete Login)
         [HttpPost("verify-otp")]
         public IActionResult VerifyOtp([FromBody] OtpVerificationDto verificationDto)
