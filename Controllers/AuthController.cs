@@ -3,10 +3,11 @@ using Microsoft.Extensions.Caching.Memory;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Registration.Domain.Entity;
-using Registration.Application.Dto;
+using WebApi.Data;
+using Domain.Entity;
+using Application.Dto;
 
-namespace Registration.Data
+namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

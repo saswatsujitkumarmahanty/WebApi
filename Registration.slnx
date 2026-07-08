@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="../Registration.Application/Registration.Application.csproj" Id="386e142c-7387-450b-9c65-74b01f822b43" />
-  <Project Path="../Registration.Domain/Registration.Domain.csproj" Id="e3094f59-fa76-4e34-aa3e-c5e6288ff435" />
-  <Project Path="../Registration.Infrastructure/Registration.Infrastructure.csproj" Id="2ee21710-a37e-4c46-9138-3190a97ac3bb" />
-  <Project Path="Registration.csproj" />
+  <Project Path="../Registration.Application/Application.csproj" Id="386e142c-7387-450b-9c65-74b01f822b43" />
+  <Project Path="../Registration.Domain/Domain.csproj" Id="e3094f59-fa76-4e34-aa3e-c5e6288ff435" />
+  <Project Path="../Registration.Infrastructure/Infrastructure.csproj" Id="2ee21710-a37e-4c46-9138-3190a97ac3bb" />
+  <Project Path="WebApi.csproj" />
 </Solution>

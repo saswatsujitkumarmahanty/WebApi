@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Registration.Domain.Entity;
+﻿using Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 
-namespace Registration.Data
+namespace WebApi.Data
 {
     public class RegistrationDbContext : DbContext
     {

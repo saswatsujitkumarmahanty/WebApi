@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Registration.Data;
+using WebApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>

@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Registration.Application.Dto;
-using Registration.Data;
+﻿using Application.Dto;
+using Microsoft.AspNetCore.Mvc;
+using WebApi.Data;
 
-namespace Registration.Controllers
+namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
