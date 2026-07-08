@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Registration.Model.Entity;
+using Registration.Domain.Entity;
 
 namespace Registration.Data
 {

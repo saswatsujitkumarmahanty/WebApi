@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.Identity.Client;
+﻿using Microsoft.AspNetCore.Mvc;
+using Registration.Application.Dto;
 using Registration.Data;
-using Registration.Model.Entity;
 
 namespace Registration.Controllers
 {

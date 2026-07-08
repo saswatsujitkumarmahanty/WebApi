@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Registration.Model.Entity;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Registration.Domain.Entity;
+using Registration.Application.Dto;
 
 namespace Registration.Data
 {
