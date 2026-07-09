@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Registration.Migrations
+namespace WebApi.Migrations
 {
     /// <inheritdoc />
     public partial class AddUsersTable : Migration

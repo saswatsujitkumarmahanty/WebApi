@@ -8,7 +8,7 @@ using WebApi.Data;
 
 #nullable disable
 
-namespace Registration.Migrations
+namespace WebApi.Migrations
 {
     [DbContext(typeof(RegistrationDbContext))]
     partial class RegistrationDbContextModelSnapshot : ModelSnapshot

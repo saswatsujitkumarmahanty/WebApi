@@ -9,7 +9,7 @@ using WebApi.Data;
 
 #nullable disable
 
-namespace Registration.Migrations
+namespace WebApi.Migrations
 {
     [DbContext(typeof(RegistrationDbContext))]
     [Migration("20260612134516_AddUsersTableClean")]

@@ -1,4 +1,5 @@
 ﻿using Application.Dto;
+using Domain.Entity;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Data;
 
