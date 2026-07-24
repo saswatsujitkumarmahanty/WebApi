@@ -1,7 +1,7 @@
 ﻿using Application.Dto;
-using Domain.Entity;
+using Application.Interfaces;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Data;
 
 namespace WebApi.Controllers
 {
@@ -9,83 +9,53 @@ namespace WebApi.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly RegistrationDbContext dbContext;
+        private readonly IEmployeeRepository _repository;
 
-        public EmployeeController(RegistrationDbContext dbContext)
+        // Inject the interface, not the database logic
+        public EmployeeController(IEmployeeRepository repository)
         {
-            this.dbContext = dbContext;
+            _repository = repository;
         }
 
         [HttpGet]
-        public IActionResult GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            var employees = dbContext.Employees.ToList();
-
-            // Return them with a 200 OK status to your Angular Service
+            var employees = await _repository.GetAllEmployeesAsync();
             return Ok(employees);
         }
 
-        [HttpGet]
-        [Route("{id:guid}")]
-        public IActionResult GetAllEmployeesById(Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetAllEmployeesById(Guid id)
         {
-            var employee = dbContext.Employees.Find(id);
-            if (employee is null)
-            {
-                return NotFound();
-            }
+            var employee = await _repository.GetEmployeeByIdAsync(id);
+            if (employee == null) return NotFound();
+
             return Ok(employee);
         }
 
         [HttpPost]
-        public IActionResult AddEmployee(AddEmployeeDto addEmployeeDto)
+        public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto addEmployeeDto)
         {
-            var employeeEntity = new Employee()
-            {
-                Name = addEmployeeDto.Name,
-                Gender = addEmployeeDto.Gender,
-                Email = addEmployeeDto.Email,
-                Phone = addEmployeeDto.Phone,
-                Age = addEmployeeDto.Age,
-                Salary = addEmployeeDto.Salary,
-            };
-            dbContext.Employees.Add(employeeEntity);
-            dbContext.SaveChanges();
-
-            return Ok(employeeEntity);
+            var createdEmployee = await _repository.AddEmployeeAsync(addEmployeeDto);
+            return Ok(createdEmployee);
         }
 
-        [HttpPut]
-        [Route("{id:guid}")]
-        public IActionResult UpdateEmployee(Guid id, UpdateEmployeeDto updateEmployeeDto)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = dbContext.Employees.Find(id);
-            if (employee is null)
-            {
-                return NotFound();
-            }
-            employee.Name = updateEmployeeDto.Name;
-            employee.Gender = updateEmployeeDto.Gender;
-            employee.Email = updateEmployeeDto.Email;
-            employee.Phone = updateEmployeeDto.Phone;
-            employee.Age = updateEmployeeDto.Age;
-            employee.Salary = updateEmployeeDto.Salary;
-            dbContext.Employees.Update(employee);
-            dbContext.SaveChanges();
-            return Ok(employee);
+            var updatedEmployee = await _repository.UpdateEmployeeAsync(id, updateEmployeeDto);
+            if (updatedEmployee == null) return NotFound();
+
+            return Ok(updatedEmployee);
         }
-        [HttpDelete]
-        [Route("{id:guid}")]
-        public IActionResult DeleteEmployee(Guid id)
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteEmployee(Guid id)
         {
-            var employee = dbContext.Employees.Find(id);
-            if (employee is null)
-            {
-                return NotFound();
-            }
-            dbContext.Employees.Remove(employee);
-            dbContext.SaveChanges();
-            return Ok(employee);
+            var success = await _repository.DeleteEmployeeAsync(id);
+            if (!success) return NotFound();
+
+            return Ok(new { message = "Employee deleted successfully.", id });
         }
     }
 }

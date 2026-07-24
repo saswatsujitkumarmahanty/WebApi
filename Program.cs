@@ -1,45 +1,54 @@
 using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
+using Application.Interfaces;
+using Infrastructure.Data;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddCors(options =>
+public partial class Program
 {
-    options.AddPolicy("AllowAngularApp",
-        policy =>
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddCors(options =>
         {
-            policy.WithOrigins("http://localhost:4200") // Adjust if Angular runs on a different port
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            options.AddPolicy("AllowAngularApp",
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200") // Adjust if Angular runs on a different port
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
         });
-});
 
-// Add services to the container.
+        // Add services to the container.
 
 
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+        builder.Services.AddControllers();
+        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<RegistrationDbContext>(options => 
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddDbContext<RegistrationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddMemoryCache();
 
-builder.Services.AddMemoryCache();
+        builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-var app = builder.Build();
+        var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+        }
+
+        app.UseCors("AllowAngularApp");
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
+    }
 }
-
-app.UseCors("AllowAngularApp");
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
