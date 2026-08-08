@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Application.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -26,8 +25,6 @@ public partial class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi();
 
-        builder.Services.AddDbContext<RegistrationDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddMemoryCache();
 
         builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();

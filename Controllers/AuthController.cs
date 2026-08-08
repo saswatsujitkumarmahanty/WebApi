@@ -1,7 +1,6 @@
 ﻿using Application.Dto;
 using Application.Interfaces;
 using Domain.Entity;
-using Infrastructure.Services;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Authorization;
@@ -205,6 +204,33 @@ namespace WebApi.Controllers
             if (!ValidRoles.Contains(dto.Role, StringComparer.OrdinalIgnoreCase))
             {
                 return BadRequest(new { message = $"Role must be one of: {string.Join(", ", ValidRoles)}" });
+            }
+
+
+            // NEW — block an Admin from demoting their own account
+            var callerIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (callerIdClaim != null
+                && Guid.TryParse(callerIdClaim, out var callerId)
+                && callerId == id
+                && !dto.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "You cannot change your own role away from Admin." });
+            }
+
+            if (!dto.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                var targetUser = await _userRepository.GetUserByIdAsync(id);
+                bool targetIsCurrentlyAdmin = targetUser != null
+                    && targetUser.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+
+                if (targetIsCurrentlyAdmin)
+                {
+                    int adminCount = await _userRepository.CountAdminsAsync();
+                    if (adminCount <= 1)
+                    {
+                        return BadRequest(new { message = "Cannot demote this user — at least one Admin must remain." });
+                    }
+                }
             }
 
             bool updated = await _userRepository.UpdateUserRoleAsync(id, dto.Role);
