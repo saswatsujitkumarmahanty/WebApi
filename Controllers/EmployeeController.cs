@@ -1,12 +1,14 @@
 ﻿using Application.Dto;
 using Application.Interfaces;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] // any authenticated user (User or Admin) can hit read endpoints below
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeRepository _repository;
@@ -33,6 +35,7 @@ namespace WebApi.Controllers
             return Ok(employee);
         }
 
+        [Authorize(Roles = "Admin")] // NEW — only Admins can create employees
         [HttpPost]
         public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeDto addEmployeeDto)
         {
@@ -40,6 +43,7 @@ namespace WebApi.Controllers
             return Ok(createdEmployee);
         }
 
+        [Authorize(Roles = "Admin")] // NEW — only Admins can update employees
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> UpdateEmployee(Guid id, [FromBody] UpdateEmployeeDto updateEmployeeDto)
         {
@@ -49,6 +53,7 @@ namespace WebApi.Controllers
             return Ok(updatedEmployee);
         }
 
+        [Authorize(Roles = "Admin")] // NEW — only Admins can delete employees
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteEmployee(Guid id)
         {

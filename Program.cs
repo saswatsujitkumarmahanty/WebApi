@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Application.Interfaces;
 using Infrastructure.Data;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 public partial class Program
 {
@@ -12,17 +16,13 @@ public partial class Program
             options.AddPolicy("AllowAngularApp",
                 policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200") // Adjust if Angular runs on a different port
+                    policy.WithOrigins("http://localhost:4200")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
         });
 
-        // Add services to the container.
-
-
         builder.Services.AddControllers();
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddOpenApi();
 
@@ -32,19 +32,44 @@ public partial class Program
 
         builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<ITokenService, TokenService>(); // NEW
+
+        // NEW — JWT authentication setup
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        var jwtKey = jwtSettings["Key"]
+            ?? throw new InvalidOperationException("Jwt:Key is not configured. Set it via user-secrets or an environment variable.");
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            };
+        });
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
         }
 
         app.UseCors("AllowAngularApp");
-
         app.UseHttpsRedirection();
 
+        app.UseAuthentication(); // NEW — must come before UseAuthorization, and it was missing entirely before
         app.UseAuthorization();
 
         app.MapControllers();
