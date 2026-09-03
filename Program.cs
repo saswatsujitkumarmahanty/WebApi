@@ -23,7 +23,7 @@ public partial class Program
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddOpenApi();
+        
 
         builder.Services.AddMemoryCache();
 
@@ -57,11 +57,6 @@ public partial class Program
         });
 
         var app = builder.Build();
-
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
 
         app.UseCors("AllowAngularApp");
         app.UseHttpsRedirection();
