@@ -60,8 +60,7 @@ public partial class Program
 
         app.UseCors("AllowAngularApp");
         app.UseHttpsRedirection();
-
-        app.UseAuthentication(); // NEW — must come before UseAuthorization, and it was missing entirely before
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
